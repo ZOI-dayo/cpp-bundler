@@ -47,15 +47,17 @@ void read_file(Path file, const deque<Path>& include_path, set<Path>& skip_targe
       if(skip_target.count(include_file)) {
         cout << endl;
       } else {
-        cout << "#line 1 \"" << include_file << "\"" << endl;
+        cout << "#line 1 \"" << include_file.string() << "\"" << endl;
         read_file(include_file, include_path, skip_target);
-        cout << "#line " << num+1 << " \"" << file << "\"" << endl;
+        cout << "#line " << num+1 << " \"" << file.string() << "\"" << endl;
       }
     } else {
       if(s.starts_with("#pragma once")) {
         skip_target.insert(file);
+        cout << endl;
+      } else {
+        cout << s << endl;
       }
-      cout << s << endl;
     }
     num++;
   }
@@ -84,7 +86,8 @@ int main(int argc, char** argv) {
     throw runtime_error("入力ファイルが指定されていません。");
   }
   // ファイル読み込み
-  const Path src_file = argv[optind];
+  const Path src_file_name = argv[optind];
+  const Path src_file = src_file_name.is_absolute() ? src_file_name : fs::current_path() / src_file_name;
   ifstream src_file_reader(src_file);
   if (!src_file_reader) {
     throw runtime_error("入力ファイルが見つかりませんでした。");
