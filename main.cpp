@@ -1,7 +1,5 @@
 #include <string>
-#include <list>
 #include <set>
-#include <vector>
 #include <fstream>
 #include <iostream>
 #include <filesystem>
@@ -28,7 +26,7 @@ Path lookup_header(const Path include_file, const Path current_file, const deque
   for(auto&& p : include_path) {
     if(auto res = check_exist(p); res) return *res;
   }
-  throw runtime_error(current_file.string() + "の処理中、" + include_file.string() + "というヘッダが見つかりませんでした。");
+  throw runtime_error(format("{}の処理中、{}というヘッダが見つかりませんでした。", current_file.string(), include_file.string()));
 }
 
 void read_file(Path file, const deque<Path>& include_path, set<Path>& skip_target) {
@@ -45,23 +43,23 @@ void read_file(Path file, const deque<Path>& include_path, set<Path>& skip_targe
     if(s.starts_with(include_token)) {
       const Path include_file = lookup_header(s.substr(include_token.size(), s.size()-(include_token.size()+1)), file, include_path);
       if(skip_target.count(include_file)) {
-        cout << endl;
+        cout << "\n";
       } else {
-        cout << "#line 1 \"" << include_file.string() << "\"" << endl;
+        cout << format("#line 1 \"{}\"\n", include_file.string());
         read_file(include_file, include_path, skip_target);
-        cout << "#line " << num+1 << " \"" << file.string() << "\"" << endl;
+        cout << format("#line {} \"{}\"\n", num+1, file.string());
       }
     } else {
       if(s.starts_with("#pragma once")) {
         skip_target.insert(file);
-        cout << endl;
+        cout << "\n";
       } else {
-        cout << s << endl;
+        cout << s << "\n";
       }
     }
     num++;
   }
-
+  cout << flush;
 }
 
 int main(int argc, char** argv) {
