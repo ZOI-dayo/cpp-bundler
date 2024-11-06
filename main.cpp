@@ -1,11 +1,13 @@
-#include <stack>
-#include <string>
-#include <set>
-#include <fstream>
-#include <iostream>
-#include <filesystem>
+#include <algorithm>
 #include <cassert>
 #include <deque>
+#include <filesystem>
+#include <format>
+#include <fstream>
+#include <iostream>
+#include <set>
+#include <stack>
+#include <string>
 #include <unistd.h>
 
 using namespace std;
