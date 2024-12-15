@@ -2,7 +2,6 @@
 #include <cassert>
 #include <deque>
 #include <filesystem>
-#include <format>
 #include <fstream>
 #include <iostream>
 #include <set>
@@ -30,7 +29,7 @@ Path lookup_header(const Path include_file, const Path current_file, const deque
   for(auto&& p : include_path) {
     if(auto res = check_exist(p); res) return *res;
   }
-  throw runtime_error(format("{}の処理中、{}というヘッダが見つかりませんでした。", current_file.string(), include_file.string()));
+  throw runtime_error(current_file.string() + "の処理中、" + include_file.string() + "というヘッダが見つかりませんでした。");
 }
 
 void read_file(Path file, const deque<Path>& include_path, set<Path>& skip_target, const set<string>& default_define_set) {
@@ -70,14 +69,14 @@ void read_file(Path file, const deque<Path>& include_path, set<Path>& skip_targe
       continue;
     } else if(s.starts_with(endif_token)) {
       if(if_stack.empty()) {
-        throw runtime_error(format("{}の処理中、{}が余分に存在します。", file.string(), endif_token));
+        throw runtime_error(file.string() + "の処理中、" + endif_token + "が余分に存在します。");
       }
       if_stack.pop();
       cout << s << "\n";
       continue;
     } else if(s.starts_with(else_token)) {
       if(if_stack.empty()) {
-        throw runtime_error(format("{}の処理中、{}が余分に存在します。", file.string(), else_token));
+        throw runtime_error(file.string() + "{}の処理中、" + else_token + "が余分に存在します。");
       }
       if_stack.top() = !if_stack.top();
       cout << s << "\n";
@@ -94,9 +93,9 @@ void read_file(Path file, const deque<Path>& include_path, set<Path>& skip_targe
       if(skip_target.count(include_file)) {
         cout << "\n";
       } else {
-        cout << format("#line 1 \"{}\"\n", include_file.string());
+        cout << "#line 1 \"" << include_file.string() << "\"\n";
         read_file(include_file, include_path, skip_target, default_define_set);
-        cout << format("#line {} \"{}\"\n", line+1, file.string());
+        cout << "#line " << line + 1 << " \"" << file.string() << "\"\n";
       }
     } else if(s.starts_with(define_token)) {
       define_set.insert(s.substr(define_token.size()));
